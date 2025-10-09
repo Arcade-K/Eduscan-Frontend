@@ -1,0 +1,34 @@
+{
+  "profile": {
+    "username": "alandrelisboa90",
+    "status": "Ambitious"
+  },
+  "users": [
+    {
+      "id": "u1",
+      "email": "demo@example.com",
+      "username": "demo",
+      "passwordHash": "$2a$10$xTPb46TCQGR1IExRnY.4hOae9/qXD3xDWwM4Duhtq5RyfARNRvuiW"
+    }
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "title": "What is photosynthesis?",
+      "createdAt": "2025-10-08T14:53:22.196Z"
+    },
+    {
+      "id": "q2",
+      "title": "Solve x^2 - 5x + 6 = 0",
+      "createdAt": "2025-10-08T14:53:22.197Z"
+    }
+  ],
+  "notes": [
+    {
+      "id": "n1",
+      "title": "Chapter 3 Summary",
+      "content": "Key takeaways...",
+      "createdAt": "2025-10-08T14:53:22.197Z"
+    }
+  ]
+}
