@@ -18,6 +18,7 @@ const { width, height } = Dimensions.get('window');
 const OnboardingScreen = ({ navigation }) => {
   const [currentScreen, setCurrentScreen] = useState(0);
   const scrollViewRef = useRef(null);
+  const svgScrollViewRef = useRef(null);
 
   const onboardingData = [
     {
@@ -51,6 +52,10 @@ const OnboardingScreen = ({ navigation }) => {
         x: nextScreen * width,
         animated: true,
       });
+      svgScrollViewRef.current?.scrollTo({
+        x: nextScreen * width,
+        animated: true,
+      });
     } else {
       navigation.replace('MainApp');
     }
@@ -75,6 +80,12 @@ const OnboardingScreen = ({ navigation }) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     const screenIndex = Math.round(contentOffsetX / width);
     setCurrentScreen(screenIndex);
+    
+    // Sync SVG background scroll
+    svgScrollViewRef.current?.scrollTo({
+      x: contentOffsetX,
+      animated: false,
+    });
   };
 
   
@@ -146,25 +157,40 @@ const OnboardingScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Top decorative SVG that covers the whole top bar and updates per active slide */}
-      <Svg
-        width={width}
-        height={height * 0.55}
-        viewBox="0 0 390 402"
-        style={[styles.svgBackgroundTop, { zIndex: -1 }]}
+      {/* SVG backgrounds for each slide */}
+      <ScrollView
+        ref={svgScrollViewRef}
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        scrollEnabled={false}
+        style={styles.svgScrollContainer}
+        contentContainerStyle={{ paddingTop: 0 }}
       >
-        <G opacity={currentScreen === 0 ? 0.12 : 1}>
-          <Rect
-          x={-85}
-          y={-157}
-          width={559}
-         height={559}
-         rx={279.5}
-         fill={currentScreen === 0 ? '#E45AC1' : '#FFFFFF'}
-  stroke={'white'}
-/>
-        </G>
-      </Svg>
+        {onboardingData.map((data, index) => (
+          <View key={index} style={{ width: width }}>
+            <Svg
+              width={width}
+              height={height * 0.55}
+              viewBox="0 0 390 402"
+              style={[styles.svgBackgroundTop, { zIndex: -1 }]}
+            >
+              <G opacity={index === 0 ? 0.1 : 1}>
+                <Rect
+                  x={-85}
+                  y={-157}
+                  width={559}
+                  height={559}
+                  rx={2323232}
+                  fill={index === 0 ? '#E45AC1' : '#FFFFFF'}
+                  stroke={'#FFFFFF'}
+                  strokeWidth={1}
+                />
+              </G>
+            </Svg>
+          </View>
+        ))}
+      </ScrollView>
 
       {/* Scrollable Onboarding Slides */}
       <ScrollView
@@ -343,7 +369,7 @@ const styles = StyleSheet.create({
     height: verticalScale(250),
     position: 'absolute',
     borderRadius: 999,
-    top: verticalScale(117),
+    top: verticalScale(80),
     transform: [{ rotate: '0deg' }],
     opacity: 1,
   },
@@ -429,14 +455,22 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: -1,
   },
+  svgScrollContainer: {
+    position: 'absolute',
+    top: -(StatusBar.currentHeight || 20),
+    left: 0,
+    right: 0,
+    height: (StatusBar.currentHeight || 20) + verticalScale(220),
+    zIndex: -1, // behind content but above base background
+  },
   svgBackgroundTop: {
-  position: 'absolute',
-  top: -(StatusBar.currentHeight || 20),
-  left: 0,
-  right: 0,
-  height: (StatusBar.currentHeight || 20) + verticalScale(220),
-  zIndex: -5, // behind header but above base background
-},
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: (StatusBar.currentHeight || 20) + verticalScale(220),
+    zIndex: -1,
+  },
 
 });
 

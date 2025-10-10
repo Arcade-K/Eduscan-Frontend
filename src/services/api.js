@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 
-const DEFAULT_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000';
+const DEFAULT_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.65:4000';
 
 let authToken = null;
 
@@ -24,11 +24,25 @@ async function request(path, options = {}) {
 
 export const api = {
   health: () => request('/health'),
+  
+  // Notes
   getNotes: () => request('/notes'),
   createNote: (note) => request('/notes', { method: 'POST', body: JSON.stringify(note) }),
-  login: (email, password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  updateNote: (id, note) => request(`/notes/${id}`, { method: 'PUT', body: JSON.stringify(note) }),
+  deleteNote: (id) => request(`/notes/${id}`, { method: 'DELETE' }),
+  
+  // Questions
   getQuestions: () => request('/questions'),
+  getQuestion: (id) => request(`/questions/${id}`),
+  createQuestion: (question) => request('/questions', { method: 'POST', body: JSON.stringify(question) }),
+  addAnswer: (questionId, answer) => request(`/questions/${questionId}/answers`, { method: 'POST', body: JSON.stringify(answer) }),
+  
+  // Authentication
+  login: (email, password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  
+  // Profile
   getProfile: () => request('/profile'),
+  updateProfile: (profile) => request('/profile', { method: 'PUT', body: JSON.stringify(profile) }),
 };
 
 

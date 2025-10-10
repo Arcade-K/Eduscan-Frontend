@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { api } from '../services/api';
 
 const AskQuestionScreen = ({ navigation }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -37,26 +38,43 @@ const AskQuestionScreen = ({ navigation }) => {
     }
   };
 
-  const handleSubmit = () => {
-    Alert.alert(
-      'Question Submitted!',
-      'Your question has been posted and will be visible to other students.',
-      [
-        {
-          text: 'OK',
-          onPress: () => {
-            // Reset form
-            setQuestion('');
-            setSelectedSubject('');
-            setSelectedGrade('');
-            setAdditionalDetails('');
-            setCurrentStep(1);
-            // Navigate back to home
-            navigation.navigate('Home');
+  const handleSubmit = async () => {
+    try {
+      await api.createQuestion({
+        title: question,
+        content: question,
+        subject: selectedSubject,
+        grade: selectedGrade,
+        additionalDetails: additionalDetails
+      });
+      
+      Alert.alert(
+        'Question Submitted!',
+        'Your question has been posted and will be visible to other students.',
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              // Reset form
+              setQuestion('');
+              setSelectedSubject('');
+              setSelectedGrade('');
+              setAdditionalDetails('');
+              setCurrentStep(1);
+              // Navigate back to home
+              navigation.navigate('Home');
+            }
           }
-        }
-      ]
-    );
+        ]
+      );
+    } catch (error) {
+      console.error('Failed to submit question:', error);
+      Alert.alert(
+        'Error',
+        'Failed to submit question. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   const renderStep1 = () => (
