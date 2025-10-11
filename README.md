@@ -1,15 +1,15 @@
 # Brainly Clone - Frontend & Backend
 
-A React Native mobile app with Node.js backend for a Brainly-like educational platform.
+A React Native mobile app with Node.js backend for eduscan.
 
 ## Features
 
-- 📱 Mobile-first React Native app
-- 🔐 JWT-based authentication
-- 📝 Notes management
-- ❓ Question & Answer system
-- 👤 User profiles
-- 🎨 Modern UI with gradients and animations
+- Mobile-first React Native app
+- JWT-based authentication
+- Notes management
+- Question & Answer system
+- User profiles
+- Modern UI with gradients and animations
 
 ## Tech Stack
 
