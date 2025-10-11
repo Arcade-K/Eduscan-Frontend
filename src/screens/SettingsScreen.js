@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, StatusBar, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -41,6 +41,39 @@ const Section = ({ title, children }) => (
 
 const SettingsScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
+
+  const checkAuthStatus = async () => {
+    try {
+      const token = await AsyncStorage.getItem('authToken');
+      if (token) {
+        // Verify token is still valid
+        try {
+          await api.verifyToken();
+          setIsLoggedIn(true);
+          setAuthToken(token);
+        } catch (error) {
+          // Token is invalid, clear it
+          await AsyncStorage.removeItem('authToken');
+          setAuthToken(null);
+          setIsLoggedIn(false);
+        }
+      } else {
+        setIsLoggedIn(false);
+      }
+    } catch (error) {
+      console.error('Auth check error:', error);
+      setIsLoggedIn(false);
+    }
+  };
+
+  const handleSignIn = () => {
+    navigation.navigate('Login');
+  };
 
   const handleLogout = () => {
     Alert.alert(
@@ -60,6 +93,7 @@ const SettingsScreen = ({ navigation }) => {
               // Clear stored authentication data
               await AsyncStorage.removeItem('authToken');
               setAuthToken(null);
+              setIsLoggedIn(false);
               
               // Navigate to login screen
               navigation.reset({
@@ -115,6 +149,7 @@ const SettingsScreen = ({ navigation }) => {
                       // Clear local data
                       await AsyncStorage.removeItem('authToken');
                       setAuthToken(null);
+                      setIsLoggedIn(false);
                       
                       // Navigate to onboarding
                       navigation.reset({
@@ -171,19 +206,29 @@ const SettingsScreen = ({ navigation }) => {
 
         <Section title="Account">
           <Row icon="globe-outline" label="Country" value="United States of America" onPress={() => navigation.navigate('CountrySelection')} />
-          <Row 
-            icon="log-out-outline" 
-            label="Log out" 
-            onPress={handleLogout}
-            disabled={loading}
-          />
-          <Row 
-            icon="trash-outline" 
-            label="Delete account" 
-            destructive 
-            onPress={handleDeleteAccount}
-            disabled={loading}
-          />
+          {isLoggedIn ? (
+            <>
+              <Row 
+                icon="log-out-outline" 
+                label="Log out" 
+                onPress={handleLogout}
+                disabled={loading}
+              />
+              <Row 
+                icon="trash-outline" 
+                label="Delete account" 
+                destructive 
+                onPress={handleDeleteAccount}
+                disabled={loading}
+              />
+            </>
+          ) : (
+            <Row 
+              icon="log-in-outline" 
+              label="Sign In" 
+              onPress={handleSignIn}
+            />
+          )}
         </Section>
       </ScrollView>
     </SafeAreaView>
