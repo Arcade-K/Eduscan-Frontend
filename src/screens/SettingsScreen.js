@@ -39,23 +39,23 @@ const SettingsScreen = ({ navigation }) => {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <Section title="General">
-          <Row icon="notifications-outline" label="Notifications" onPress={() => {}} />
+          <Row icon="notifications-outline" label="Notifications" onPress={() => navigation.navigate('NotificationSettings')} />
           <Row icon="card-outline" label="Subscription" onPress={() => {}} />
         </Section>
 
         <Section title="Community">
           <Row icon="swap-vertical-outline" label="Auto-publish" onPress={() => {}} />
-          <Row icon="people-outline" label="Blocked users" onPress={() => {}} />
+          <Row icon="people-outline" label="Blocked users" onPress={() => navigation.navigate('BlockedUsers')} />
         </Section>
 
         <Section title="EduScan">
           <Row icon="help-circle-outline" label="FAQ" onPress={() => {}} />
           <Row icon="mail-outline" label="Contact us" onPress={() => {}} />
-          <Row icon="information-circle-outline" label="About" onPress={() => {}} />
+          <Row icon="information-circle-outline" label="About" onPress={() => navigation.navigate('About')} />
         </Section>
 
         <Section title="Account">
-          <Row icon="globe-outline" label="Country" value="United States of America" onPress={() => {}} />
+          <Row icon="globe-outline" label="Country" value="United States of America" onPress={() => navigation.navigate('CountrySelection')} />
           <Row icon="log-out-outline" label="Log out" onPress={() => {}} />
           <Row icon="trash-outline" label="Delete account" destructive onPress={() => {}} />
         </Section>

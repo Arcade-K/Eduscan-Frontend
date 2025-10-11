@@ -13,6 +13,11 @@ import AskQuestionScreen from '../screens/AskQuestionScreen';
 import AITutorScreen from '../screens/AITutorScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
+import CommunityScreen from '../screens/CommunityScreen';
+import AnswerScreen from '../screens/AnswerScreen';
+import NotificationSettingsScreen from '../screens/NotificationSettingsScreen';
+import AnswersOverviewScreen from '../screens/AnswersOverviewScreen';
+import NotesListScreen from '../screens/NotesListScreen';
 import QuestionDetailScreen from '../screens/QuestionDetailScreen';
 import VoiceSearchScreen from '../screens/VoiceSearchScreen';
 import TextbookSolutionsScreen from '../screens/TextbookSolutionsScreen';
@@ -24,6 +29,12 @@ import MyQuestionsScreen from '../screens/MyQuestionsScreen';
 import NotesInputScreen from '../screens/NotesInputScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import NotesEditorScreen from '../screens/NotesEditorScreen';
+import NoteDetailScreen from '../screens/NoteDetailScreen';
+import AboutScreen from '../screens/AboutScreen';
+import BlockedUsersScreen from '../screens/BlockedUsersScreen';
+import BrowsingHistoryScreen from '../screens/BrowsingHistoryScreen';
+import CountrySelectionScreen from '../screens/CountrySelectionScreen';
+import MessagesScreen from '../screens/MessagesScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -96,6 +107,21 @@ function HomeStack() {
         component={SettingsScreen}
         options={{ headerShown: false }}
       />
+      <Stack.Screen 
+        name="Answer" 
+        component={AnswerScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="NotificationSettings" 
+        component={NotificationSettingsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="AnswersOverview" 
+        component={AnswersOverviewScreen}
+        options={{ headerShown: false }}
+      />
     </Stack.Navigator>
   );
 }
@@ -105,7 +131,7 @@ function SearchStack() {
     <Stack.Navigator>
       <Stack.Screen 
         name="SearchMain" 
-        component={SearchScreen} 
+        component={NotesListScreen} 
         options={{ headerShown: false }}
       />
       <Stack.Screen 
@@ -132,6 +158,58 @@ function SearchStack() {
           headerTintColor: '#fff',
           headerTitleStyle: { fontWeight: 'bold' }
         }}
+      />
+      <Stack.Screen 
+        name="NoteDetail" 
+        component={NoteDetailScreen}
+        options={{ headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function ProfileStack() {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen 
+        name="ProfileMain" 
+        component={ProfileScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="Notifications" 
+        component={NotificationsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="Settings" 
+        component={SettingsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="About" 
+        component={AboutScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="BlockedUsers" 
+        component={BlockedUsersScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="BrowsingHistory" 
+        component={BrowsingHistoryScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="CountrySelection" 
+        component={CountrySelectionScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="Messages" 
+        component={MessagesScreen}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );
@@ -203,7 +281,7 @@ function MainAppNavigator() {
         />
         <Tab.Screen 
           name="Community" 
-          component={NotificationsScreen}
+          component={CommunityScreen}
           options={{
             tabBarLabel: 'Community',
             tabBarIcon: ({ focused, color, size }) => (
@@ -213,7 +291,7 @@ function MainAppNavigator() {
         />
         <Tab.Screen 
           name="Profile" 
-          component={ProfileScreen}
+          component={ProfileStack}
           options={{
             tabBarLabel: 'Profile',
             tabBarIcon: ({ focused, color, size }) => (

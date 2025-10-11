@@ -25,6 +25,11 @@ async function request(path, options = {}) {
 export const api = {
   health: () => request('/health'),
   
+  // Authentication
+  login: (email, password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  register: (email, password, username) => request('/auth/register', { method: 'POST', body: JSON.stringify({ email, password, username }) }),
+  verifyToken: () => request('/auth/verify'),
+  
   // Notes
   getNotes: () => request('/notes'),
   createNote: (note) => request('/notes', { method: 'POST', body: JSON.stringify(note) }),
@@ -37,12 +42,31 @@ export const api = {
   createQuestion: (question) => request('/questions', { method: 'POST', body: JSON.stringify(question) }),
   addAnswer: (questionId, answer) => request(`/questions/${questionId}/answers`, { method: 'POST', body: JSON.stringify(answer) }),
   
-  // Authentication
-  login: (email, password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
-  
   // Profile
   getProfile: () => request('/profile'),
   updateProfile: (profile) => request('/profile', { method: 'PUT', body: JSON.stringify(profile) }),
+  
+  // Notifications
+  getNotifications: () => request('/notifications'),
+  createNotification: (notification) => request('/notifications', { method: 'POST', body: JSON.stringify(notification) }),
+  markNotificationAsRead: (id) => request(`/notifications/${id}/read`, { method: 'PUT' }),
+  
+  // Messages
+  getMessages: () => request('/messages'),
+  sendMessage: (message) => request('/messages', { method: 'POST', body: JSON.stringify(message) }),
+  
+  // Browsing History
+  getBrowsingHistory: () => request('/browsing-history'),
+  addBrowsingHistory: (historyItem) => request('/browsing-history', { method: 'POST', body: JSON.stringify(historyItem) }),
+  
+  // Blocked Users
+  getBlockedUsers: () => request('/blocked-users'),
+  blockUser: (blockedUserId) => request('/blocked-users', { method: 'POST', body: JSON.stringify({ blockedUserId }) }),
+  unblockUser: (blockedUserId) => request(`/blocked-users/${blockedUserId}`, { method: 'DELETE' }),
+  
+  // Settings
+  getSettings: () => request('/settings'),
+  updateSettings: (settings) => request('/settings', { method: 'PUT', body: JSON.stringify(settings) }),
 };
 
 

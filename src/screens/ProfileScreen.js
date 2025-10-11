@@ -45,7 +45,10 @@ const ProfileScreen = ({ navigation }) => {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Profile</Text>
         <View style={styles.headerIcons}>
-          <TouchableOpacity style={styles.headerIcon}>
+          <TouchableOpacity 
+            style={styles.headerIcon}
+            onPress={() => navigation.navigate('Notifications')}
+          >
             <Ionicons name="notifications-outline" size={24} color="#111827" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.headerIcon} onPress={() => navigation.navigate('Settings')}>
@@ -112,7 +115,7 @@ const ProfileScreen = ({ navigation }) => {
         <View style={styles.menuContainer}>
           <TouchableOpacity 
             style={styles.menuItem} 
-            onPress={() => handleMenuPress('Browsing History')}
+            onPress={() => navigation.navigate('BrowsingHistory')}
           >
             <Ionicons name="time-outline" size={20} color="#6B7280" />
             <Text style={styles.menuText}>Browsing History</Text>
@@ -148,10 +151,10 @@ const ProfileScreen = ({ navigation }) => {
 
           <TouchableOpacity 
             style={styles.menuItem} 
-            onPress={() => handleMenuPress('Posted Answers')}
+            onPress={() => navigation.navigate('AnswersOverview')}
           >
-            <Ionicons name="notifications-outline" size={20} color="#6B7280" />
-            <Text style={styles.menuText}>Posted Answers</Text>
+            <Ionicons name="checkmark-circle-outline" size={20} color="#6B7280" />
+            <Text style={styles.menuText}>Browse Answers</Text>
             <Ionicons name="chevron-forward" size={16} color="#D1D5DB" />
           </TouchableOpacity>
 

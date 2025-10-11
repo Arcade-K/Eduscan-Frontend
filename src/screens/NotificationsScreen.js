@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,36 +10,54 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { api } from '../services/api';
 
 const NotificationsScreen = ({ navigation }) => {
-  const [questions, setQuestions] = useState([]);
+  // Mock notification data
+  const [notifications] = useState([
+    {
+      id: '1',
+      type: 'rank',
+      title: 'You gained a new rank: Ambitious',
+      timeAgo: '5 days ago',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
+      hasStar: true,
+    },
+    {
+      id: '2',
+      type: 'progress',
+      title: 'Your weekly progress report is available!',
+      timeAgo: '1 week ago',
+      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',
+      hasStar: false,
+    },
+    {
+      id: '3',
+      type: 'answer',
+      title: 'A new expert answer to your question in Physics has been posted.',
+      timeAgo: '3 weeks ago',
+      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+      hasStar: false,
+    },
+    {
+      id: '4',
+      type: 'group',
+      title: 'New study group "Calculus Masters" has been created.',
+      timeAgo: '1 month ago',
+      avatar: 'https://images.unsplash.com/photo-1522075469751-3849565d9d7a?w=100&h=100&fit=crop&crop=face',
+      hasStar: false,
+    },
+  ]);
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const data = await api.getQuestions();
-        if (mounted) setQuestions(data);
-      } catch (e) {
-        console.error('Failed to load questions', e);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const handleGiveAnswer = (question) => {
-    navigation.navigate('AskQuestion');
+  const handleBack = () => {
+    navigation.goBack();
   };
 
-  const handleAskQuestion = () => {
-    navigation.navigate('AskQuestion');
+  const handleMessages = () => {
+    navigation.navigate('Messages');
   };
 
-  const handleFilterQuestions = () => {
-    // Handle filter functionality
+  const handleNotificationPress = (notification) => {
+    console.log('Notification pressed:', notification.title);
   };
 
   return (
@@ -48,66 +66,50 @@ const NotificationsScreen = ({ navigation }) => {
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Community</Text>
-      </View>
-
-      {/* Filter Questions */}
-      <View style={styles.filterSection}>
-        <TouchableOpacity style={styles.filterButton} onPress={handleFilterQuestions}>
-          <Ionicons name="filter" size={20} color="#6366F1" />
-          <Text style={styles.filterText}>FILTER QUESTIONS</Text>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#111827" />
         </TouchableOpacity>
+        <Text style={styles.headerTitle}>Notifications</Text>
+        <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Answer Questions Card */}
-        <View style={styles.answerCard}>
-          <View style={styles.answerCardContent}>
-            <View style={styles.answerTextContainer}>
-              <Text style={styles.answerCardTitle}>Answer questions</Text>
-              <Text style={styles.answerCardSubtitle}>Lend a hand to other students</Text>
-              <Text style={styles.answerCardSubtitle}>and get rewarded for sharing</Text>
-              <Text style={styles.answerCardSubtitle}>your knowledge!</Text>
-            </View>
-            <View style={styles.crownIcon}>
-              <Ionicons name="trophy" size={40} color="#8B5CF6" />
-            </View>
+        {/* Messages Section */}
+        <TouchableOpacity style={styles.messagesSection} onPress={handleMessages}>
+          <View style={styles.messagesContent}>
+            <Ionicons name="chatbubble-outline" size={24} color="#111827" />
+            <Text style={styles.messagesText}>Messages</Text>
+            <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
           </View>
-        </View>
+        </TouchableOpacity>
 
-        {/* Question Cards */}
-        {questions.map((question) => (
-          <View key={question.id} style={styles.questionCard}>
-            <View style={styles.questionHeader}>
-              <Image source={{ uri: question.profileImage }} style={styles.profileImage} />
-              <View style={styles.questionMeta}>
-                <Text style={styles.subjectText}>{question.subject}</Text>
-                <Text style={styles.pointsText}>{question.points}</Text>
-                <Text style={styles.timeText}>{question.timeAgo}</Text>
+        {/* Older Notifications Heading */}
+        <Text style={styles.olderHeading}>Older notifications</Text>
+
+        {/* Notifications List */}
+        {notifications.map((notification) => (
+          <TouchableOpacity
+            key={notification.id}
+            style={styles.notificationItem}
+            onPress={() => handleNotificationPress(notification)}
+          >
+            <View style={styles.notificationContent}>
+              <View style={styles.avatarContainer}>
+                <Image source={{ uri: notification.avatar }} style={styles.avatar} />
+                {notification.hasStar && (
+                  <View style={styles.starBadge}>
+                    <Ionicons name="star" size={12} color="#fff" />
+                  </View>
+                )}
+        </View>
+              <View style={styles.notificationText}>
+                <Text style={styles.notificationTitle}>{notification.title}</Text>
+                <Text style={styles.notificationTime}>{notification.timeAgo}</Text>
               </View>
             </View>
-            
-            <Text style={styles.questionText} numberOfLines={3}>
-              {question.question}
-            </Text>
-            
-            <TouchableOpacity 
-              style={styles.giveAnswerButton}
-              onPress={() => handleGiveAnswer(question)}
-            >
-              <Text style={styles.giveAnswerText}>GIVE ANSWER</Text>
             </TouchableOpacity>
-          </View>
         ))}
       </ScrollView>
-
-      {/* Ask Question Button */}
-      <View style={styles.askQuestionSection}>
-        <TouchableOpacity style={styles.askQuestionButton} onPress={handleAskQuestion}>
-          <Ionicons name="add" size={24} color="#fff" />
-          <Text style={styles.askQuestionText}>Ask question</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 };
@@ -115,162 +117,104 @@ const NotificationsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#fff',
   },
   header: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#111827',
-    textAlign: 'center',
-  },
-  filterSection: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
-  },
-  filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
-  filterText: {
-    fontSize: 16,
-    color: '#6366F1',
-    fontWeight: '600',
+  backButton: {
+    padding: 4,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#111827',
+  },
+  headerSpacer: {
+    width: 32,
   },
   content: {
     flex: 1,
+  },
+  messagesSection: {
+    backgroundColor: '#fff',
     paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
   },
-  answerCard: {
-    backgroundColor: '#D1FAE5',
-    borderRadius: 16,
-    padding: 20,
-    marginVertical: 16,
-  },
-  answerCardContent: {
+  messagesContent: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  answerTextContainer: {
+  messagesText: {
     flex: 1,
-  },
-  answerCardTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 4,
-  },
-  answerCardSubtitle: {
-    fontSize: 14,
-    color: '#6B7280',
-    lineHeight: 20,
-  },
-  crownIcon: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  questionCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  questionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 12,
-  },
-  questionMeta: {
-    flex: 1,
-  },
-  subjectText: {
     fontSize: 16,
-    fontWeight: '600',
     color: '#111827',
-    marginBottom: 2,
-  },
-  pointsText: {
-    fontSize: 14,
-    color: '#6366F1',
+    marginLeft: 12,
     fontWeight: '500',
-    marginBottom: 2,
   },
-  timeText: {
-    fontSize: 12,
+  olderHeading: {
+    fontSize: 14,
     color: '#9CA3AF',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: '#F9FAFB',
   },
-  questionText: {
-    fontSize: 15,
-    color: '#111827',
-    lineHeight: 22,
-    marginBottom: 16,
-  },
-  giveAnswerButton: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#6366F1',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  giveAnswerText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  askQuestionSection: {
+  notificationItem: {
+    backgroundColor: '#fff',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
   },
-  askQuestionButton: {
+  notificationContent: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  avatarContainer: {
+    position: 'relative',
+    marginRight: 12,
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  starBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    backgroundColor: '#F59E0B',
+    borderRadius: 8,
+    width: 16,
+    height: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#6366F1',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    gap: 8,
-    shadowColor: '#6366F1',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    borderWidth: 2,
+    borderColor: '#fff',
   },
-  askQuestionText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+  notificationText: {
+    flex: 1,
+    paddingTop: 4,
+  },
+  notificationTitle: {
+    fontSize: 15,
+    color: '#111827',
+    lineHeight: 20,
+    marginBottom: 4,
+  },
+  notificationTime: {
+    fontSize: 13,
+    color: '#9CA3AF',
   },
 });
 

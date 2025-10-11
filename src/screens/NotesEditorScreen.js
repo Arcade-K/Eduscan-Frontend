@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   StatusBar,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { api } from '../services/api';
@@ -19,12 +20,39 @@ const NotesEditorScreen = ({ navigation }) => {
   };
 
   const handleConfirm = async () => {
+    if (!title.trim()) {
+      Alert.alert('Error', 'Please enter a title for your note.');
+      return;
+    }
+
+    if (!content.trim()) {
+      Alert.alert('Error', 'Please enter some content for your note.');
+      return;
+    }
+
     try {
-      await api.createNote({ title, content });
-      navigation.goBack();
-    } catch (e) {
-      // Minimal fallback; production app should show a toast
-      console.error('Failed to save note', e);
+      await api.createNote({ 
+        title: title.trim(), 
+        content: content.trim() 
+      });
+      
+      Alert.alert(
+        'Success', 
+        'Note saved successfully!',
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.goBack()
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Failed to save note', error);
+      Alert.alert(
+        'Error', 
+        'Failed to save note. Please try again.',
+        [{ text: 'OK' }]
+      );
     }
   };
 
