@@ -29,6 +29,7 @@ export const api = {
   login: (email, password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
   register: (email, password, username) => request('/auth/register', { method: 'POST', body: JSON.stringify({ email, password, username }) }),
   verifyToken: () => request('/auth/verify'),
+  deleteAccount: () => request('/auth/account', { method: 'DELETE' }),
   
   // Notes
   getNotes: () => request('/notes'),

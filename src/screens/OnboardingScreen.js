@@ -69,7 +69,7 @@ const OnboardingScreen = ({ navigation }) => {
   };
 
   const handleJoinNow = () => {
-    navigation.replace('MainApp');
+    navigation.navigate('SignUp');
   };
 
   const handleLogin = () => {

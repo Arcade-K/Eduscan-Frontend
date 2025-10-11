@@ -11,12 +11,11 @@ const LoginScreen = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleBack = () => {
-    navigation.goBack();
+    navigation.navigate('Onboarding');
   };
 
   const handleSignUp = () => {
-    // Navigate to sign up screen
-    console.log('Sign up tapped');
+    navigation.navigate('SignUp');
   };
 
   const handleLogin = async () => {

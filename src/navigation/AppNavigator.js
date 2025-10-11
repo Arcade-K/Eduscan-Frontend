@@ -35,6 +35,8 @@ import BlockedUsersScreen from '../screens/BlockedUsersScreen';
 import BrowsingHistoryScreen from '../screens/BrowsingHistoryScreen';
 import CountrySelectionScreen from '../screens/CountrySelectionScreen';
 import MessagesScreen from '../screens/MessagesScreen';
+import SignUpScreen from '../screens/SignUpScreen';
+import SplashScreen from '../screens/SplashScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -306,9 +308,11 @@ function MainAppNavigator() {
 export default function AppNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Onboarding" screenOptions={{ headerShown: false }}>
+      <Stack.Navigator initialRouteName="Splash" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="Onboarding" component={OnboardingScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="MainApp" component={MainAppNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
