@@ -171,21 +171,18 @@ const OnboardingScreen = ({ navigation }) => {
           <View key={index} style={{ width: width }}>
             <Svg
               width={width}
-              height={height}
-              viewBox={`0 0 ${width} ${height}`}
+              height={height + verticalScale(100)}
+              viewBox={`0 0 ${width} ${height + verticalScale(100)}`}
               style={[styles.svgBackgroundTop, { zIndex: -1 }]}
             >
               <G opacity={1}>
-                {/* Bottom section with cream/yellow background */}
                 <Rect
                   x={0}
                   y={0}
                   width={width}
-                  height={height}
+                  height={height + verticalScale(100)}
                   fill={index === 1 ? "#D9F0FE" : index === 2 ? "#F3F6FC" : "#FEF3D5"} // Different backgrounds for each slide
                 />
-                
-                {/* Full circle in upper section */}
                 <Circle
                   cx={width / 2}
                   cy={height * 0.1}
