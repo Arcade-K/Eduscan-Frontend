@@ -37,6 +37,7 @@ import CountrySelectionScreen from '../screens/CountrySelectionScreen';
 import MessagesScreen from '../screens/MessagesScreen';
 import SignUpScreen from '../screens/SignUpScreen';
 import SplashScreen from '../screens/SplashScreen';
+import LiveExpertSessionsScreen from '../screens/LiveExpertSessionsScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -211,6 +212,11 @@ function ProfileStack() {
       <Stack.Screen 
         name="Messages" 
         component={MessagesScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="LiveExpertSessions" 
+        component={LiveExpertSessionsScreen}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

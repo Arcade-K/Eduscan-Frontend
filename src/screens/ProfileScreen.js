@@ -160,7 +160,7 @@ const ProfileScreen = ({ navigation }) => {
 
           <TouchableOpacity 
             style={styles.menuItem} 
-            onPress={() => handleMenuPress('Live Expert Sessions')}
+            onPress={() => navigation.navigate('LiveExpertSessions')}
           >
             <Ionicons name="radio-outline" size={20} color="#6B7280" />
             <Text style={styles.menuText}>Live Expert Sessions</Text>

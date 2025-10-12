@@ -10,7 +10,7 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Rect, G, Defs, LinearGradient, Stop, Path, Circle } from 'react-native-svg';
+import Svg, { Rect, G, Defs, LinearGradient, Stop, Path, Circle, Ellipse } from 'react-native-svg';
 import { normalizeFont, scale, verticalScale } from '../utils/responsive';
 
 const { width, height } = Dimensions.get('window');
@@ -25,7 +25,7 @@ const OnboardingScreen = ({ navigation }) => {
       id: 1,
       title: 'The community is ready to help you',
       description:
-        'Join millions of students who help each other learn and grow together in our supportive community.',
+        'Ask millions of users for solutions that come with detailed explanations.',
       color: '#6366F1',
     },
     {
@@ -105,7 +105,7 @@ const OnboardingScreen = ({ navigation }) => {
                 style={styles.avatarImage1}
               />
               <View style={styles.textCardLeft}>
-                <Text style={styles.textCardTitle}>Ask here</Text>
+                <Text style={styles.textCardTitle}>Ask here!</Text>
               </View>
             </View>
 
@@ -113,7 +113,7 @@ const OnboardingScreen = ({ navigation }) => {
             {/* Right avatar + text container (absolute positioned) */}
             <View style={styles.rightMessageWrap}>
               <View style={styles.textCardRight}>
-                <Text style={styles.textCardTitle}>Need help</Text>
+                <Text style={styles.textCardTitle}>Need help?</Text>
               </View>
               <Image
                 source={require('../../assets/avatars/Avatar1.png')}
@@ -123,13 +123,13 @@ const OnboardingScreen = ({ navigation }) => {
           </View>
         ) : index === 1 ? (
           <Image
-            source={require('../../assets/Group 2.png')}
-            style={styles.slideImage1}
+            source={require('../../assets/Bookimage.png')}
+            style={styles.bookImage}
           />
         ) : (
           <Image
-            source={require('../../assets/Group 3.png')}
-            style={styles.slideImage2}
+            source={require('../../assets/smartphone.png')}
+            style={styles.smartphoneImage}
           />
         )}
       </View>
@@ -171,20 +171,26 @@ const OnboardingScreen = ({ navigation }) => {
           <View key={index} style={{ width: width }}>
             <Svg
               width={width}
-              height={height * 0.55}
-              viewBox="0 0 390 402"
+              height={height}
+              viewBox={`0 0 ${width} ${height}`}
               style={[styles.svgBackgroundTop, { zIndex: -1 }]}
             >
-              <G opacity={index === 0 ? 0.1 : 1}>
+              <G opacity={1}>
+                {/* Bottom section with cream/yellow background */}
                 <Rect
-                  x={-85}
-                  y={-157}
-                  width={559}
-                  height={559}
-                  rx={2323232}
-                  fill={index === 0 ? '#E45AC1' : '#FFFFFF'}
-                  stroke={'#FFFFFF'}
-                  strokeWidth={1}
+                  x={0}
+                  y={0}
+                  width={width}
+                  height={height}
+                  fill={index === 1 ? "#D9F0FE" : index === 2 ? "#F3F6FC" : "#FEF3D5"} // Different backgrounds for each slide
+                />
+                
+                {/* Full circle in upper section */}
+                <Circle
+                  cx={width / 2}
+                  cy={height * 0.1}
+                  r={height * 0.4}
+                  fill={index === 0 ? "#FFE4E1" : index === 1 ? "#FFFFFF" : "#FFFFFF"} // White for second and third slides
                 />
               </G>
             </Svg>
@@ -230,7 +236,7 @@ const OnboardingScreen = ({ navigation }) => {
       {/* Bottom Buttons */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity style={styles.joinButton} onPress={handleJoinNow}>
-          <Text style={styles.joinButtonText}>JOIN NOW FREE</Text>
+          <Text style={styles.joinButtonText}>JOIN FOR FREE</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={handleLogin}>
@@ -244,7 +250,7 @@ const OnboardingScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FEF3D5',
+    backgroundColor: '#FEF3D5', // Cream/yellow bottom section
   },
   header: {
     flexDirection: 'row',
@@ -298,7 +304,7 @@ const styles = StyleSheet.create({
   leftMessageWrap: {
     position: 'absolute',
     left: scale(20),
-    top: verticalScale(100),
+    top: verticalScale(80),
     alignItems: 'flex-start',
   },
   rightMessageWrap: {
@@ -319,7 +325,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   textCardLeft: {
-    backgroundColor: '#fff',
+    backgroundColor: '#4CAF50', // Green color for "Ask here!" bubble
     paddingVertical: verticalScale(8),
     paddingHorizontal: scale(12),
     borderRadius: scale(12),
@@ -332,7 +338,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   textCardRight: {
-    backgroundColor: '#fff',
+    backgroundColor: '#2196F3', // Blue color for "Need help?" bubble
     paddingVertical: verticalScale(8),
     paddingHorizontal: scale(12),
     borderRadius: scale(12),
@@ -345,7 +351,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   textCardTitle: {
-    color: '#111827',
+    color: '#FFFFFF', // White text for better contrast on colored backgrounds
     fontSize: normalizeFont(16),
     fontWeight: '700',
   },
@@ -363,6 +369,16 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     resizeMode: 'cover',
     backgroundColor: '#fff',
+  },
+  bookImage: {
+    width: scale(320),
+    height: verticalScale(200),
+    resizeMode: 'contain',
+  },
+  smartphoneImage: {
+    width: scale(300),
+    height: verticalScale(220),
+    resizeMode: 'contain',
   },
   slideImage1: {
    width: scale(360),
@@ -460,7 +476,7 @@ const styles = StyleSheet.create({
     top: -(StatusBar.currentHeight || 20),
     left: 0,
     right: 0,
-    height: (StatusBar.currentHeight || 20) + verticalScale(220),
+    height: height + (StatusBar.currentHeight || 20),
     zIndex: -1, // behind content but above base background
   },
   svgBackgroundTop: {
@@ -468,7 +484,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: (StatusBar.currentHeight || 20) + verticalScale(220),
+    height: height + (StatusBar.currentHeight || 20),
     zIndex: -1,
   },
 

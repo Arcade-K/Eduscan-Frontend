@@ -5,18 +5,27 @@ import {
   StyleSheet,
   StatusBar,
   TouchableOpacity,
-  Modal,
   Dimensions,
+  Alert,
+  Image,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
 
 const { width, height } = Dimensions.get('window');
 
 const CameraScreen = ({ navigation }) => {
-  const [showTipsModal, setShowTipsModal] = useState(true);
+  const [selectedType, setSelectedType] = useState('general');
   const [permission, requestPermission] = useCameraPermissions();
+  const [capturedImage, setCapturedImage] = useState(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [focusPoint, setFocusPoint] = useState(null);
+  const [showFocusIndicator, setShowFocusIndicator] = useState(false);
   const cameraRef = useRef(null);
 
   useEffect(() => {
@@ -25,98 +34,314 @@ const CameraScreen = ({ navigation }) => {
     }
   }, [permission]);
 
-  const handleGotIt = () => {
-    setShowTipsModal(false);
-  };
-
   const handleCloseCamera = () => {
     navigation.goBack();
   };
 
+  const handleCapture = async () => {
+    if (!permission?.granted) {
+      Alert.alert('Permission Required', 'Camera permission is required to take photos');
+      return;
+    }
+
+    if (!cameraRef.current) {
+      Alert.alert('Error', 'Camera not ready. Please try again.');
+      return;
+    }
+
+    try {
+      setIsCapturing(true);
+      const photo = await cameraRef.current.takePictureAsync({
+        quality: 0.8,
+        base64: false,
+        skipProcessing: false,
+      });
+      
+      if (photo && photo.uri) {
+        setCapturedImage(photo.uri);
+        setShowPreview(true);
+      } else {
+        throw new Error('No photo data received');
+      }
+    } catch (error) {
+      console.error('Error capturing photo:', error);
+      Alert.alert('Error', 'Failed to capture photo. Please try again.');
+    } finally {
+      setIsCapturing(false);
+    }
+  };
+
+  const handleGallery = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission Required', 
+          'Please grant access to your photo library to select images',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Settings', onPress: () => console.log('Open settings') }
+          ]
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+        exif: false,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const selectedImage = result.assets[0];
+        if (selectedImage.uri) {
+          setCapturedImage(selectedImage.uri);
+          setShowPreview(true);
+        } else {
+          throw new Error('No image URI received');
+        }
+      }
+    } catch (error) {
+      console.error('Error accessing gallery:', error);
+      Alert.alert('Error', 'Failed to access gallery. Please try again.');
+    }
+  };
+
+  const handleFocus = () => {
+    // Show focus indicator at center of camera view
+    setFocusPoint({ x: 0.5, y: 0.5 });
+    setShowFocusIndicator(true);
+    
+    // Hide focus indicator after 2 seconds
+    setTimeout(() => {
+      setShowFocusIndicator(false);
+    }, 2000);
+  };
+
+  const handleCameraTap = (event) => {
+    const { locationX, locationY } = event.nativeEvent;
+    const { width: cameraWidth, height: cameraHeight } = event.nativeEvent.target.getBoundingClientRect();
+    
+    // Calculate normalized coordinates (0-1)
+    const x = locationX / cameraWidth;
+    const y = locationY / cameraHeight;
+    
+    setFocusPoint({ x, y });
+    setShowFocusIndicator(true);
+    
+    // Hide focus indicator after 2 seconds
+    setTimeout(() => {
+      setShowFocusIndicator(false);
+    }, 2000);
+  };
+
+  const handleDocumentType = () => {
+    Alert.alert(
+      'Document Type',
+      `Current type: ${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}\n\nSelect the type of document you want to scan:`,
+      [
+        { 
+          text: 'General', 
+          onPress: () => setSelectedType('general'),
+          style: selectedType === 'general' ? 'default' : 'cancel'
+        },
+        { 
+          text: 'Math', 
+          onPress: () => setSelectedType('math'),
+          style: selectedType === 'math' ? 'default' : 'cancel'
+        },
+        { text: 'Cancel', style: 'cancel' }
+      ]
+    );
+  };
+
+  const handleRetake = () => {
+    setCapturedImage(null);
+    setShowPreview(false);
+  };
+
+  const handleUsePhoto = async () => {
+    try {
+      if (!capturedImage) {
+        Alert.alert('Error', 'No image to process');
+        return;
+      }
+
+      // Here you would typically process the image or save it
+      // For now, we'll just show a success message
+      Alert.alert(
+        'Photo Captured Successfully!',
+        `Document type: ${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)}\n\nImage has been processed and saved.`,
+        [
+          { 
+            text: 'OK', 
+            onPress: () => {
+              setShowPreview(false);
+              setCapturedImage(null);
+              navigation.goBack();
+            }
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error processing photo:', error);
+      Alert.alert('Error', 'Failed to process photo. Please try again.');
+    }
+  };
+
+  const handleClosePreview = () => {
+    setShowPreview(false);
+    setCapturedImage(null);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1A1A2E" />
+      <StatusBar barStyle="light-content" backgroundColor="#000000" />
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Scanning Tips</Text>
+        <TouchableOpacity onPress={handleCloseCamera} style={styles.closeButton}>
+          <Ionicons name="close" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Scan Document</Text>
+        <TouchableOpacity style={styles.muteButton}>
+          <Ionicons name="volume-mute" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
       </View>
 
-      {/* Camera Viewfinder */}
-      <View style={styles.cameraViewfinder}>
+      {/* Document Type Selector */}
+      <View style={styles.documentTypeSelector}>
+        <TouchableOpacity 
+          style={[styles.typeButton, selectedType === 'general' && styles.typeButtonActive]}
+          onPress={() => setSelectedType('general')}
+        >
+          <Text style={[styles.typeButtonText, selectedType === 'general' && styles.typeButtonTextActive]}>
+            General
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.typeButton, selectedType === 'math' && styles.typeButtonActive]}
+          onPress={() => setSelectedType('math')}
+        >
+          <Text style={[styles.typeButtonText, selectedType === 'math' && styles.typeButtonTextActive]}>
+            Math
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Camera View */}
+      <View style={styles.cameraContainer}>
         {permission?.granted ? (
-          <CameraView ref={cameraRef} style={styles.cameraPreview} facing="back" />
+          <TouchableOpacity 
+            style={styles.cameraPreview} 
+            onPress={handleCameraTap}
+            activeOpacity={1}
+          >
+            <CameraView ref={cameraRef} style={styles.cameraPreview} facing="back" />
+          </TouchableOpacity>
         ) : (
           <View style={styles.cameraPlaceholder}>
-            <Ionicons name="camera" size={60} color="#6B7280" />
-            <Text style={styles.cameraText}>Waiting for camera permission…</Text>
-            <TouchableOpacity style={styles.gotItButton} onPress={requestPermission}>
-              <Text style={styles.gotItButtonText}>Enable camera</Text>
+            <Text style={styles.cameraText}>Camera Live View</Text>
+            <Text style={styles.cameraSubtext}>Position document within the frame.</Text>
+            <TouchableOpacity style={styles.enableButton} onPress={requestPermission}>
+              <Text style={styles.enableButtonText}>Enable camera</Text>
             </TouchableOpacity>
           </View>
         )}
-        {/* Shutter button */}
-        <View style={styles.shutterContainer}>
-          <View style={styles.shutterButton} />
+        
+        {/* Focus Indicator Overlay */}
+        <View style={styles.focusIndicatorOverlay}>
+          <View style={styles.focusFrame}>
+            <View style={[styles.corner, styles.topLeft]} />
+            <View style={[styles.corner, styles.topRight]} />
+            <View style={[styles.corner, styles.bottomLeft]} />
+            <View style={[styles.corner, styles.bottomRight]} />
+          </View>
+          <View style={styles.centerDot} />
         </View>
+        
+        {/* Dynamic Focus Indicator */}
+        {showFocusIndicator && focusPoint && (
+          <View 
+            style={[
+              styles.dynamicFocusIndicator,
+              {
+                left: `${focusPoint.x * 100}%`,
+                top: `${focusPoint.y * 100}%`,
+                transform: [
+                  { translateX: -15 },
+                  { translateY: -15 }
+                ]
+              }
+            ]}
+          >
+            <View style={styles.focusRing} />
+          </View>
+        )}
       </View>
 
-      {/* Scanning Tips Modal */}
+      {/* Bottom Controls */}
+      <View style={styles.bottomControls}>
+        <TouchableOpacity style={styles.controlButton} onPress={handleGallery}>
+          <Ionicons name="image" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[styles.captureButton, isCapturing && styles.captureButtonDisabled]} 
+          onPress={handleCapture}
+          disabled={isCapturing}
+        >
+          <View style={styles.captureButtonInner}>
+            {isCapturing ? (
+              <View style={styles.loadingSpinner}>
+                <Ionicons name="refresh" size={20} color="#FFFFFF" />
+              </View>
+            ) : (
+              <View style={styles.captureIcon}>
+                <Ionicons name="camera" size={24} color="#FFFFFF" />
+              </View>
+            )}
+          </View>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.controlButton} onPress={handleFocus}>
+          <Ionicons name="scan" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Photo Preview Modal */}
       <Modal
-        visible={showTipsModal}
+        visible={showPreview}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowTipsModal(false)}
+        onRequestClose={handleClosePreview}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            {/* Modal Handle */}
-            <View style={styles.modalHandle} />
-            
-            {/* Close Button */}
-            <TouchableOpacity 
-              style={styles.closeButton}
-              onPress={() => setShowTipsModal(false)}
-            >
-              <Ionicons name="close" size={24} color="#6B7280" />
-            </TouchableOpacity>
-
-            {/* Illustration */}
-            <View style={styles.illustrationContainer}>
-              <View style={styles.personIllustration}>
-                <View style={styles.personBody}>
-                  <Ionicons name="person" size={40} color="#4F46E5" />
-                </View>
-                <View style={styles.magnifyingGlass}>
-                  <Ionicons name="add" size={20} color="#fff" />
-                </View>
-              </View>
-              <View style={styles.shapesContainer}>
-                <View style={[styles.shape, styles.shape1]} />
-                <View style={[styles.shape, styles.shape2]} />
-                <View style={[styles.shape, styles.shape3]} />
-                <View style={[styles.shape, styles.shape4]} />
-              </View>
+        <View style={styles.previewOverlay}>
+          <View style={styles.previewContainer}>
+            <View style={styles.previewHeader}>
+              <TouchableOpacity onPress={handleClosePreview} style={styles.previewCloseButton}>
+                <Ionicons name="close" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+              <Text style={styles.previewTitle}>Preview</Text>
+              <View style={styles.previewPlaceholder} />
             </View>
-
-            {/* Content */}
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Tips for scanning</Text>
+            
+            <View style={styles.previewImageContainer}>
+              <Image source={{ uri: capturedImage }} style={styles.previewImage} />
+            </View>
+            
+            <View style={styles.previewControls}>
+              <TouchableOpacity style={styles.previewButton} onPress={handleRetake}>
+                <Ionicons name="camera" size={20} color="#FFFFFF" />
+                <Text style={styles.previewButtonText}>Retake</Text>
+              </TouchableOpacity>
               
-              <View style={styles.tipsList}>
-                <View style={styles.tipItem}>
-                  <Text style={styles.tipText}>Keep text inside frame</Text>
-                </View>
-                <View style={styles.tipItem}>
-                  <Text style={styles.tipText}>Ensure text isn't blurry</Text>
-                </View>
-                <View style={styles.tipItem}>
-                  <Text style={styles.tipText}>Keep it level and flat</Text>
-                </View>
-              </View>
-
-              <TouchableOpacity style={styles.gotItButton} onPress={handleGotIt}>
-                <Text style={styles.gotItButtonText}>Got it</Text>
+              <TouchableOpacity style={styles.previewButton} onPress={handleUsePhoto}>
+                <Ionicons name="checkmark" size={20} color="#FFFFFF" />
+                <Text style={styles.previewButtonText}>Use Photo</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -129,174 +354,278 @@ const CameraScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#000000',
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    backgroundColor: '#000000',
+  },
+  closeButton: {
+    padding: 8,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#111827',
+    color: '#FFFFFF',
     textAlign: 'center',
-  },
-  cameraViewfinder: {
     flex: 1,
-    backgroundColor: '#374151',
-    justifyContent: 'center',
+  },
+  muteButton: {
+    padding: 8,
+  },
+  documentTypeSelector: {
+    flexDirection: 'row',
+    marginHorizontal: 20,
+    marginBottom: 20,
+    backgroundColor: '#1A1A1A',
+    borderRadius: 8,
+    padding: 4,
+  },
+  typeButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 6,
     alignItems: 'center',
   },
+  typeButtonActive: {
+    backgroundColor: '#1E40AF',
+  },
+  typeButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#FFFFFF',
+  },
+  typeButtonTextActive: {
+    color: '#FFFFFF',
+  },
+  cameraContainer: {
+    flex: 1,
+    backgroundColor: '#000000',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
   cameraPreview: {
+    width: '100%',
+    height: '100%',
+  },
+  cameraPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 40,
+  },
+  cameraText: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '600',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  cameraSubtext: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 20,
+    opacity: 0.8,
+  },
+  enableButton: {
+    backgroundColor: '#22C55E',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  enableButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  focusIndicatorOverlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-  },
-  cameraPlaceholder: {
-    alignItems: 'center',
     justifyContent: 'center',
+    alignItems: 'center',
+    pointerEvents: 'none',
   },
-  cameraText: {
-    color: '#9CA3AF',
-    fontSize: 16,
-    marginTop: 12,
+  focusFrame: {
+    width: 250,
+    height: 200,
+    position: 'relative',
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContainer: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 40,
-    minHeight: height * 0.6,
-  },
-  modalHandle: {
-    width: 40,
-    height: 4,
-    backgroundColor: '#D1D5DB',
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: 20,
-  },
-  closeButton: {
+  corner: {
     position: 'absolute',
-    top: 20,
-    right: 20,
-    padding: 8,
+    width: 20,
+    height: 20,
+    borderColor: '#22C55E',
+    borderWidth: 3,
   },
-  illustrationContainer: {
+  topLeft: {
+    top: 0,
+    left: 0,
+    borderRightWidth: 0,
+    borderBottomWidth: 0,
+  },
+  topRight: {
+    top: 0,
+    right: 0,
+    borderLeftWidth: 0,
+    borderBottomWidth: 0,
+  },
+  bottomLeft: {
+    bottom: 0,
+    left: 0,
+    borderRightWidth: 0,
+    borderTopWidth: 0,
+  },
+  bottomRight: {
+    bottom: 0,
+    right: 0,
+    borderLeftWidth: 0,
+    borderTopWidth: 0,
+  },
+  centerDot: {
+    position: 'absolute',
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#22C55E',
+    top: '50%',
+    left: '50%',
+    marginTop: -4,
+    marginLeft: -4,
+  },
+  dynamicFocusIndicator: {
+    position: 'absolute',
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 30,
-    position: 'relative',
   },
-  personIllustration: {
+  focusRing: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: '#22C55E',
+    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+  },
+  bottomControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    backgroundColor: '#000000',
+  },
+  controlButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#1A1A1A',
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
   },
-  personBody: {
+  captureButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#22C55E',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 4,
+    borderColor: '#FFFFFF',
+  },
+  captureButtonInner: {
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: '#4F46E5',
+    backgroundColor: '#22C55E',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  magnifyingGlass: {
-    position: 'absolute',
-    right: -20,
-    top: 10,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F59E0B',
+  captureButtonDisabled: {
+    opacity: 0.6,
+  },
+  loadingSpinner: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  shapesContainer: {
-    position: 'absolute',
-    left: 20,
-    top: 20,
+  captureIcon: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  previewOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewContainer: {
+    width: '90%',
+    height: '80%',
+    backgroundColor: '#000000',
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  previewHeader: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#1A1A1A',
+  },
+  previewCloseButton: {
+    padding: 8,
+  },
+  previewTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+  },
+  previewPlaceholder: {
+    width: 40,
+  },
+  previewImageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000000',
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
+  },
+  previewControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    backgroundColor: '#1A1A1A',
+  },
+  previewButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#22C55E',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
     gap: 8,
   },
-  shape: {
-    width: 16,
-    height: 16,
-    borderRadius: 2,
-  },
-  shape1: {
-    backgroundColor: '#F59E0B',
-  },
-  shape2: {
-    backgroundColor: '#8B5CF6',
-  },
-  shape3: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#000',
-  },
-  shape4: {
-    backgroundColor: '#000',
-  },
-  modalContent: {
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 24,
-  },
-  tipsList: {
-    width: '100%',
-    marginBottom: 32,
-  },
-  tipItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  tipText: {
-    fontSize: 16,
-    color: '#111827',
-    textAlign: 'center',
-  },
-  gotItButton: {
-    backgroundColor: '#6366F1',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 12,
-    width: '100%',
-    alignItems: 'center',
-  },
-  gotItButtonText: {
-    color: '#fff',
+  previewButtonText: {
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
-  },
-  shutterContainer: {
-    position: 'absolute',
-    bottom: 28,
-    width: '100%',
-    alignItems: 'center',
-  },
-  shutterButton: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#22C55E',
-    borderWidth: 4,
-    borderColor: '#fff',
   },
 });
 

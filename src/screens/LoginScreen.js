@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, StatusBar, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,6 +9,8 @@ const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleBack = () => {
     navigation.navigate('Onboarding');
@@ -19,13 +21,57 @@ const LoginScreen = ({ navigation }) => {
   };
 
   const handleLogin = async () => {
+    // Clear previous errors
+    setError('');
+    
+    // Basic validation
+    if (!email.trim()) {
+      setError('Please enter your email or username');
+      return;
+    }
+    
+    if (!password.trim()) {
+      setError('Please enter your password');
+      return;
+    }
+
     try {
+      setLoading(true);
       const { token } = await api.login(email, password);
       setAuthToken(token);
       await AsyncStorage.setItem('authToken', token);
       navigation.replace('MainApp');
     } catch (e) {
       console.error('Login failed', e);
+      
+      // Extract error message from the error object
+      let errorMessage = 'Login failed. Please try again.';
+      
+      if (e.message) {
+        try {
+          // Try to parse JSON error message
+          const errorData = JSON.parse(e.message);
+          if (errorData.error) {
+            errorMessage = errorData.error;
+          }
+        } catch {
+          // If not JSON, use the message directly
+          errorMessage = e.message;
+        }
+      }
+      
+      // Handle specific error cases
+      if (errorMessage.includes('invalid credentials')) {
+        errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+      } else if (errorMessage.includes('Too many authentication attempts')) {
+        errorMessage = 'Too many login attempts. Please wait a few minutes before trying again.';
+      } else if (errorMessage.includes('Network request failed')) {
+        errorMessage = 'Network error. Please check your internet connection and try again.';
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -67,23 +113,29 @@ const LoginScreen = ({ navigation }) => {
         {/* Input Fields */}
         <View style={styles.inputSection}>
           <TextInput
-            style={styles.input}
+            style={[styles.input, error && styles.inputError]}
             placeholder="Username or email"
             placeholderTextColor="#9CA3AF"
             autoCapitalize="none"
             keyboardType="email-address"
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(text) => {
+              setEmail(text);
+              if (error) setError(''); // Clear error when user starts typing
+            }}
           />
 
           <View style={styles.passwordContainer}>
             <TextInput
-              style={styles.passwordInput}
+              style={[styles.passwordInput, error && styles.inputError]}
               placeholder="Password"
               placeholderTextColor="#9CA3AF"
               secureTextEntry={!showPassword}
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => {
+                setPassword(text);
+                if (error) setError(''); // Clear error when user starts typing
+              }}
             />
             <TouchableOpacity
               style={styles.eyeButton}
@@ -98,9 +150,23 @@ const LoginScreen = ({ navigation }) => {
           </View>
         </View>
 
+        {/* Error Message */}
+        {error ? (
+          <View style={styles.errorContainer}>
+            <Ionicons name="alert-circle-outline" size={16} color="#EF4444" />
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : null}
+
         {/* Login Button */}
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginText}>Log in</Text>
+        <TouchableOpacity 
+          style={[styles.loginButton, loading && styles.loginButtonDisabled]} 
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          <Text style={styles.loginText}>
+            {loading ? 'Logging in...' : 'Log in'}
+          </Text>
         </TouchableOpacity>
 
         {/* Forgot Password */}
@@ -295,6 +361,29 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: '#EF4444',
+    fontSize: 14,
+    marginLeft: 8,
+    flex: 1,
+  },
+  inputError: {
+    borderColor: '#EF4444',
+  },
+  loginButtonDisabled: {
+    backgroundColor: '#9CA3AF',
   },
 });
 
