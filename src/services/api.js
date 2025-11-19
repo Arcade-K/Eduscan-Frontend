@@ -2,25 +2,22 @@ import { Platform } from 'react-native';
 
 // Get the base URL for API requests
 const getBaseURL = () => {
-  // Allow override via environment variable
+  // Allow override via environment variable (highest priority)
   if (process.env.EXPO_PUBLIC_API_URL) {
     return process.env.EXPO_PUBLIC_API_URL;
   }
   
-  // For iOS simulator, use localhost
-  if (Platform.OS === 'ios') {
-    // Check if we're in development and might be on a physical device
-    // If localhost doesn't work, user should set EXPO_PUBLIC_API_URL to their machine's IP
-    return 'http://localhost:4000';
-  }
+  // Default to production backend
+  return 'https://eduscan-backend-btcl.onrender.com';
   
-  // For Android emulator, use 10.0.2.2
-  if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:4000';
-  }
-  
-  // Default fallback
-  return 'http://localhost:4000';
+  // Fallback to localhost for local development (uncomment if needed)
+  // if (Platform.OS === 'ios') {
+  //   return 'http://localhost:4000';
+  // }
+  // if (Platform.OS === 'android') {
+  //   return 'http://10.0.2.2:4000';
+  // }
+  // return 'http://localhost:4000';
 };
 
 const DEFAULT_BASE_URL = getBaseURL();

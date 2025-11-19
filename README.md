@@ -50,6 +50,24 @@ start-dev.bat
 
 #### Option 2: Manual Setup
 
+**Using Production Backend (Recommended):**
+
+1. **Install frontend dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+2. **Start the frontend:**
+
+   ```bash
+   npm start
+   ```
+
+   The app will automatically connect to the production backend at `https://eduscan-backend-btcl.onrender.com`.
+
+**Using Local Backend:**
+
 1. **Install dependencies:**
 
    ```bash
@@ -62,7 +80,17 @@ start-dev.bat
    cd ../Eduscan-Frontend
    ```
 
-2. **Seed the database:**
+2. **Configure frontend for local backend:**
+
+   Create a `.env` file in the frontend directory:
+
+   ```bash
+   echo "EXPO_PUBLIC_API_URL=http://localhost:4000" > .env
+   ```
+
+   For physical devices, use your machine's IP address instead of localhost.
+
+3. **Seed the database:**
 
    ```bash
    cd ../Eduscan-Backend
@@ -70,14 +98,14 @@ start-dev.bat
    cd ../Eduscan-Frontend
    ```
 
-3. **Start the backend server:**
+4. **Start the backend server:**
 
    ```bash
    cd ../Eduscan-Backend
    npm run dev
    ```
 
-4. **Start the frontend (in a new terminal):**
+5. **Start the frontend (in a new terminal):**
    ```bash
    npm start
    ```
@@ -88,6 +116,8 @@ start-dev.bat
 - **Password:** password123
 
 ## API Endpoints
+
+All endpoints are available at the production backend: `https://eduscan-backend-btcl.onrender.com`
 
 ### Authentication
 
@@ -134,14 +164,40 @@ Documents/
 
 ## Development Notes
 
-- The backend runs on `http://localhost:4000` by default
+- **Production Backend:** The app is configured to use the deployed backend at `https://eduscan-backend-btcl.onrender.com` by default
+- **Local Development:** To use a local backend, create a `.env` file in the frontend directory (see Environment Variables below)
 - The frontend connects to the backend via the API service
 - Authentication tokens are stored in AsyncStorage
-- The database is a JSON file (`../Eduscan-Backend/data/db.json`) for simplicity
+- The database is a JSON file (`../Eduscan-Backend/data/db.json`) for local development
+
+## Backend Deployment
+
+The backend is deployed on Render at:
+
+- **Production URL:** https://eduscan-backend-btcl.onrender.com
+
+The frontend is configured to use this production backend by default. For local development, see Environment Variables below.
 
 ## Environment Variables
 
-Create a `.env` file in the `../Eduscan-Backend` directory:
+### Frontend (.env)
+
+Create a `.env` file in the `Eduscan-Frontend` directory to configure the API URL:
+
+```env
+# Production (default)
+EXPO_PUBLIC_API_URL=https://eduscan-backend-btcl.onrender.com
+
+# For local development, use your machine's IP or localhost:
+# EXPO_PUBLIC_API_URL=http://localhost:4000
+# EXPO_PUBLIC_API_URL=http://192.168.1.71:4000
+```
+
+**Note:** After changing the `.env` file, restart the Expo server for changes to take effect.
+
+### Backend (.env)
+
+Create a `.env` file in the `../Eduscan-Backend` directory for local development:
 
 ```env
 PORT=4000
