@@ -1,6 +1,34 @@
 import { Platform } from 'react-native';
 
-const DEFAULT_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.1.65:4000';
+// Get the base URL for API requests
+const getBaseURL = () => {
+  // Allow override via environment variable
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return process.env.EXPO_PUBLIC_API_URL;
+  }
+  
+  // For iOS simulator, use localhost
+  if (Platform.OS === 'ios') {
+    // Check if we're in development and might be on a physical device
+    // If localhost doesn't work, user should set EXPO_PUBLIC_API_URL to their machine's IP
+    return 'http://localhost:4000';
+  }
+  
+  // For Android emulator, use 10.0.2.2
+  if (Platform.OS === 'android') {
+    return 'http://10.0.2.2:4000';
+  }
+  
+  // Default fallback
+  return 'http://localhost:4000';
+};
+
+const DEFAULT_BASE_URL = getBaseURL();
+
+// Log the API URL for debugging (only in development)
+if (__DEV__) {
+  console.log('🔗 API Base URL:', DEFAULT_BASE_URL);
+}
 
 let authToken = null;
 
@@ -11,15 +39,24 @@ export function setAuthToken(token) {
 async function request(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   if (authToken) headers.Authorization = `Bearer ${authToken}`;
-  const res = await fetch(`${DEFAULT_BASE_URL}${path}`, {
-    headers,
-    ...options,
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || `Request failed: ${res.status}`);
+  
+  try {
+    const res = await fetch(`${DEFAULT_BASE_URL}${path}`, {
+      headers,
+      ...options,
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || `Request failed: ${res.status}`);
+    }
+    return res.json();
+  } catch (error) {
+    // Improve error messages for network failures
+    if (error.message === 'Network request failed' || error.message.includes('Network')) {
+      throw new Error(`Cannot connect to backend at ${DEFAULT_BASE_URL}. Make sure the backend server is running.`);
+    }
+    throw error;
   }
-  return res.json();
 }
 
 export const api = {

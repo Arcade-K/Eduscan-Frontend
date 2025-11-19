@@ -23,23 +23,23 @@ if not exist "node_modules" (
     npm install
 )
 
-REM Install backend dependencies if server/node_modules doesn't exist
-if not exist "server\node_modules" (
+REM Install backend dependencies if ../Eduscan-Backend/node_modules doesn't exist
+if not exist "..\Eduscan-Backend\node_modules" (
     echo 📦 Installing backend dependencies...
-    cd server
+    cd ..\Eduscan-Backend
     npm install
-    cd ..
+    cd ..\Eduscan-Frontend
 )
 
 REM Seed the database
 echo 🌱 Seeding database...
-cd server
+cd ..\Eduscan-Backend
 npm run seed
-cd ..
+cd ..\brainly-clone-front-end
 
 REM Start backend server in background
 echo 🔧 Starting backend server...
-start /B cmd /C "cd server && npm run dev"
+start /B cmd /C "cd /d %~dp0..\Eduscan-Backend && npm run dev"
 
 REM Wait a moment for backend to start
 timeout /t 3 /nobreak >nul

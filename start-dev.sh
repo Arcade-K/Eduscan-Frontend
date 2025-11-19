@@ -24,7 +24,7 @@ fi
 # Get the directory of the script itself
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FRONTEND_DIR="$SCRIPT_DIR"
-BACKEND_DIR="$SCRIPT_DIR/server"
+BACKEND_DIR="$(dirname "$SCRIPT_DIR")/Eduscan-Backend"
 
 echo -e "${BLUE}📁 Frontend: $FRONTEND_DIR${NC}"
 echo -e "${BLUE}📁 Backend: $BACKEND_DIR${NC}"

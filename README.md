@@ -1,4 +1,4 @@
-# Brainly Clone - Frontend & Backend
+# Eduscan - Frontend & Backend
 
 A React Native mobile app with Node.js backend for eduscan.
 
@@ -14,12 +14,14 @@ A React Native mobile app with Node.js backend for eduscan.
 ## Tech Stack
 
 ### Frontend
+
 - React Native with Expo
 - React Navigation
 - AsyncStorage for local storage
 - Expo Linear Gradient
 
 ### Backend
+
 - Node.js with Express
 - LowDB for data persistence
 - JWT for authentication
@@ -29,6 +31,7 @@ A React Native mobile app with Node.js backend for eduscan.
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js (v16 or higher)
 - npm or yarn
 - Expo CLI (`npm install -g @expo/cli`)
@@ -36,6 +39,7 @@ A React Native mobile app with Node.js backend for eduscan.
 ### Development Setup
 
 #### Option 1: Automated Setup (Recommended)
+
 ```bash
 # On macOS/Linux
 ./start-dev.sh
@@ -47,26 +51,29 @@ start-dev.bat
 #### Option 2: Manual Setup
 
 1. **Install dependencies:**
+
    ```bash
    # Frontend dependencies
    npm install
-   
+
    # Backend dependencies
-   cd server
+   cd ../Eduscan-Backend
    npm install
-   cd ..
+   cd ../Eduscan-Frontend
    ```
 
 2. **Seed the database:**
+
    ```bash
-   cd server
+   cd ../Eduscan-Backend
    npm run seed
-   cd ..
+   cd ../Eduscan-Frontend
    ```
 
 3. **Start the backend server:**
+
    ```bash
-   cd server
+   cd ../Eduscan-Backend
    npm run dev
    ```
 
@@ -83,41 +90,46 @@ start-dev.bat
 ## API Endpoints
 
 ### Authentication
+
 - `POST /auth/login` - User login
 
 ### Notes
+
 - `GET /notes` - Get user's notes (requires auth)
 - `POST /notes` - Create a new note (requires auth)
 - `PUT /notes/:id` - Update a note (requires auth)
 - `DELETE /notes/:id` - Delete a note (requires auth)
 
 ### Questions
+
 - `GET /questions` - Get all questions
 - `GET /questions/:id` - Get a specific question
 - `POST /questions` - Create a new question (requires auth)
 - `POST /questions/:id/answers` - Add an answer to a question (requires auth)
 
 ### Profile
+
 - `GET /profile` - Get user profile (requires auth)
 - `PUT /profile` - Update user profile (requires auth)
 
 ## Project Structure
 
 ```
-brainly-clone-front-end/
-├── src/
-│   ├── components/          # Reusable components
-│   ├── navigation/          # Navigation configuration
-│   ├── screens/            # Screen components
-│   ├── services/           # API services
-│   └── utils/              # Utility functions
-├── server/
+Documents/
+├── Eduscan-Frontend/
 │   ├── src/
-│   │   ├── lib/            # Database configuration
-│   │   └── routes/         # API routes
-│   └── scripts/           # Database seeding
-├── assets/                 # Images and static assets
-└── android/               # Android-specific files
+│   │   ├── components/          # Reusable components
+│   │   ├── navigation/          # Navigation configuration
+│   │   ├── screens/            # Screen components
+│   │   ├── services/           # API services
+│   │   └── utils/              # Utility functions
+│   ├── assets/                 # Images and static assets
+│   └── android/               # Android-specific files
+└── Eduscan-Backend/
+    ├── src/
+    │   ├── lib/            # Database configuration
+    │   └── routes/         # API routes
+    └── scripts/           # Database seeding
 ```
 
 ## Development Notes
@@ -125,11 +137,11 @@ brainly-clone-front-end/
 - The backend runs on `http://localhost:4000` by default
 - The frontend connects to the backend via the API service
 - Authentication tokens are stored in AsyncStorage
-- The database is a JSON file (`server/data/db.json`) for simplicity
+- The database is a JSON file (`../Eduscan-Backend/data/db.json`) for simplicity
 
 ## Environment Variables
 
-Create a `.env` file in the server directory:
+Create a `.env` file in the `../Eduscan-Backend` directory:
 
 ```env
 PORT=4000
